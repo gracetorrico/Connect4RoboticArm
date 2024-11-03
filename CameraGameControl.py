@@ -11,11 +11,12 @@ cuadrados = []
 cuadrado_seleccionado = None
 offset_x = 0
 offset_y = 0
-ultimo_tablero = None  # Para almacenar el estado del tablero anterior
 turno_robot = True  # True si es el turno de tu robot, False si es el turno del oponente
 ultimo_tiempo_turno = time.time()
 tablero = np.zeros((6, 5), dtype=int)
 calibration_time = True
+move_detected = False
+global best_move
 
 # Matrices para el estado del tablero
 board_detected = np.zeros((BOARD_SIZE_Y, BOARD_SIZE_X), dtype=int)  # 0s y 1s (detección básica)
@@ -61,7 +62,7 @@ def mouse_event(event, x, y, flags, param):
         cuadrado_seleccionado = None
 
 def detectar_fichas_webcam(num_filas=BOARD_SIZE_Y, num_columnas=BOARD_SIZE_X, gamma=1.5, intervalo=5, tamano_celda=50):
-    global cuadrados, ultimo_tablero, turno_robot, ultimo_tiempo_turno, tablero, calibration_time
+    global cuadrados, turno_robot, ultimo_tiempo_turno, tablero, calibration_time, move_detected
 
     # Iniciar la captura de la webcam
     cap = cv2.VideoCapture(1)
@@ -146,19 +147,13 @@ def detectar_fichas_webcam(num_filas=BOARD_SIZE_Y, num_columnas=BOARD_SIZE_X, ga
                     else:
                         tablero[idx // num_columnas, idx % num_columnas] = 0  # Marcar como vacío si no cumple el umbral
                 
-                if turno_robot:
-                    print("Es el turno del robot.")
-                    robot_play()
-                    detect_changes()
-                    turno_robot = False
-                else:
-                    print("Es el turno del oponente.")
-                detect_changes()
-                
+                #Gestionar cambio de tablero y turnos
+
                 # Imprimir el estado del tablero en la consola
                 print("IMPRIENDO DE COMPUTER VISION")
                 print("Estado del tablero (1 = ficha presente, 0 = vacío):")
-                print(tablero)
+                board_detected = tablero
+                print(board_detected)
 
         # Mostrar la imagen procesada con la cuadrícula y detecciones
         cv2.imshow("Detección de fichas en el tablero", imagen_procesada)
@@ -172,12 +167,6 @@ def detectar_fichas_webcam(num_filas=BOARD_SIZE_Y, num_columnas=BOARD_SIZE_X, ga
     # Liberar la cámara y cerrar las ventanas de OpenCV
     cap.release()
     cv2.destroyAllWindows()
-   
-# Función para actualizar la matriz del tablero
-def update_board():
-    global board_detected
-    board_detected = detectar_fichas_webcam()
-    detect_changes()
 
 
 # Función para detectar cambios en el tablero
@@ -212,5 +201,6 @@ def robot_play():
     print("IMPRIENDO DE TESTING COLUMNA CON JUGADA")
     print("Estado del tablero:")
     print(board_game)
+    
 
 detectar_fichas_webcam()
