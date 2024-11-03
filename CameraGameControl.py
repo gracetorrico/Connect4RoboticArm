@@ -180,10 +180,11 @@ def detectar_fichas_webcam(num_filas=BOARD_SIZE_Y, num_columnas=BOARD_SIZE_X, ga
 # Función para detectar cambios en el tablero
 def detect_changes():
     global turno_robot, board_detected
+    print("IMPRIENDO DE DETECT CHANGES")
+    print(board_detected)
     for row in range(BOARD_SIZE_Y):
         for col in range(BOARD_SIZE_X):
             if board_detected[row][col] == 1 and board_game[row][col] == 0:
-                # Movimiento detectado 
                 print("Movimiento detectado.")
                 #board_game[row][col] = AI_PLAYER if turno_robot else OTHER_PLAYER
                 if turno_robot:
@@ -198,9 +199,10 @@ def detect_changes():
                 print("Estado del tablero:")
                 print(board_game)
                 return True
-            else:
-                print("No se detecto movimiento")
-                return False
+    print("No se detecto movimiento")
+    if turno_robot:
+       print("La mejor jugada es en fila " + str(bestFil), " y en la columna " + str(bestCol))
+    return False
 
 
 
