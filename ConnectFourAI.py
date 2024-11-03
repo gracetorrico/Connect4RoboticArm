@@ -285,10 +285,10 @@ def bestMove(gameState, player, opponent):
         gameState[currentMove[0]][currentMove[1]] = 0
 
         if winner == OTHER_PLAYER:
-            return currentMove[1]
+            return currentMove
 
     move, score = minimax(gameState, SEARCH_DEPTH, player, opponent)
-    return move[1]
+    return move
 
 #
 # Method that verifies if the current board is in a winning state

@@ -16,7 +16,9 @@ ultimo_tiempo_turno = time.time()
 tablero = np.zeros((6, 5), dtype=int)
 calibration_time = True
 move_detected = False
-global best_move
+bestFil=0
+bestCol=0
+
 
 # Matrices para el estado del tablero
 board_detected = np.zeros((BOARD_SIZE_Y, BOARD_SIZE_X), dtype=int)  # 0s y 1s (detección básica)
@@ -56,13 +58,12 @@ def mouse_event(event, x, y, flags, param):
             tamano_celda = cuadrados[cuadrado_seleccionado][2]
             cuadrados[cuadrado_seleccionado] = (x_nuevo, y_nuevo, tamano_celda)
 
-
     elif event == cv2.EVENT_LBUTTONUP:
         # Cuando se suelta el botón izquierdo del mouse
         cuadrado_seleccionado = None
 
 def detectar_fichas_webcam(num_filas=BOARD_SIZE_Y, num_columnas=BOARD_SIZE_X, gamma=1.5, intervalo=5, tamano_celda=50):
-    global cuadrados, turno_robot, ultimo_tiempo_turno, tablero, calibration_time, move_detected
+    global cuadrados, turno_robot, ultimo_tiempo_turno, tablero, calibration_time, move_detected, bestFil, bestCol
 
     # Iniciar la captura de la webcam
     cap = cv2.VideoCapture(1)
@@ -113,6 +114,10 @@ def detectar_fichas_webcam(num_filas=BOARD_SIZE_Y, num_columnas=BOARD_SIZE_X, ga
             print("Tiempo de calibración")
             if time.time() - ultimo_tiempo >= 60:
                 calibration_time = False
+                ultimo_tiempo_turno = time.time()
+                if turno_robot:
+                    bestFil, bestCol = bestMove(board_game, AI_PLAYER, OTHER_PLAYER)
+                    print("La mejor jugada es en fila " + str(bestFil), " y en la columna " + str(bestCol))
         else:
             # Actualizar cada 'intervalo' segundos
             if time.time() - ultimo_tiempo >= intervalo:
@@ -147,17 +152,20 @@ def detectar_fichas_webcam(num_filas=BOARD_SIZE_Y, num_columnas=BOARD_SIZE_X, ga
                     else:
                         tablero[idx // num_columnas, idx % num_columnas] = 0  # Marcar como vacío si no cumple el umbral
                 
-                #Gestionar cambio de tablero y turnos
-
                 # Imprimir el estado del tablero en la consola
                 print("IMPRIENDO DE COMPUTER VISION")
                 print("Estado del tablero (1 = ficha presente, 0 = vacío):")
                 board_detected = tablero
                 print(board_detected)
 
+                #Gestionar cambio de tablero y turnos
+                if (time.time() - ultimo_tiempo_turno >= 40) or detect_changes():
+                    turno_robot = not turno_robot
+                    ultimo_tiempo_turno = time.time()
+                
+
         # Mostrar la imagen procesada con la cuadrícula y detecciones
         cv2.imshow("Detección de fichas en el tablero", imagen_procesada)
-
 
         # Salir del bucle si se presiona la tecla 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -171,23 +179,29 @@ def detectar_fichas_webcam(num_filas=BOARD_SIZE_Y, num_columnas=BOARD_SIZE_X, ga
 
 # Función para detectar cambios en el tablero
 def detect_changes():
-    global turno_robot
+    global turno_robot, board_detected
     for row in range(BOARD_SIZE_Y):
         for col in range(BOARD_SIZE_X):
             if board_detected[row][col] == 1 and board_game[row][col] == 0:
-                # Movimiento detectado de oponente
-                board_game[row][col] = OTHER_PLAYER
-                print("Movimiento detectado del oponente.")
-                print("IMPRIENDO DE TESTING")
+                # Movimiento detectado 
+                print("Movimiento detectado.")
+                #board_game[row][col] = AI_PLAYER if turno_robot else OTHER_PLAYER
+                if turno_robot:
+                    if row == bestFil and col==bestCol:
+                        print("Ficha situada en posición CORRECTA")
+                    else:
+                        print("Ficha situada en posición incorrecta")
+                    board_game[row][col] = AI_PLAYER
+                else:
+                    board_game[row][col] = OTHER_PLAYER
+
                 print("Estado del tablero:")
                 print(board_game)
-                turno_robot = True
-                return
-            elif board_detected[row][col] == 0 and board_game[row][col] == AI_PLAYER:
-                # Verificación si el robot falló en situar la ficha
-                print("Error: El robot no colocó la ficha en la posición indicada.")
-                turno_robot = True
-                return
+                return True
+            else:
+                print("No se detecto movimiento")
+                return False
+
 
 
 # Función para ejecutar el movimiento del robot
