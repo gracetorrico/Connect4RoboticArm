@@ -95,14 +95,20 @@ def detectar_fichas_webcam(num_filas=6, num_columnas=5, gamma=1.5, intervalo=2, 
 
     # Variables para el juego
     per_turn_timeout = 45  # segundos
-    turn_start_time = None
+    turn_start_time = time.time() 
     current_player = AI_PLAYER  # Nuestro robot empieza
-    last_board_state = None  # Inicializar como None
+    last_board_state = np.zeros((num_filas, num_columnas), dtype=int)
     pending_changes = {}
     game_over = False
 
     # Variable para almacenar la recomendación de la IA
-    ai_recommendation = None
+    gameState = last_board_state.copy()
+    ai_recommendation = bestMove(gameState.tolist(), AI_PLAYER, OTHER_PLAYER)
+    if ai_recommendation is not None:
+        print(f"La IA recomienda colocar la ficha en la columna: {ai_recommendation}")
+    else:
+        print("No hay movimientos posibles. El juego ha terminado en empate.")
+        game_over = True
 
     while True:
         ret, imagen = cap.read()
@@ -144,7 +150,7 @@ def detectar_fichas_webcam(num_filas=6, num_columnas=5, gamma=1.5, intervalo=2, 
                         x_inicio, y_inicio, tamano_celda = cuadrados[idx_cuadrado]
                         x_fin = x_inicio + tamano_celda
                         y_fin = y_inicio + tamano_celda
-                        color_jugador = (0, 0, 255) if jugador == AI_PLAYER else (0, 255, 0)
+                        color_jugador = (0, 0, 255) if jugador == OTHER_PLAYER else (0, 255, 0)
                         cv2.rectangle(imagen_procesada, (int(x_inicio), int(y_inicio)), (int(x_fin), int(y_fin)), color_jugador, -1)
 
         # Periodo de calibración
@@ -258,7 +264,7 @@ def detectar_fichas_webcam(num_filas=6, num_columnas=5, gamma=1.5, intervalo=2, 
                             winner = checkWin(last_board_state.tolist())
                             if winner == current_player:
                                 if current_player == AI_PLAYER:
-                                    print("¡Jugador 1 ha ganado el juego!")
+                                    print("¡Hemos ganado!")
                                 else:
                                     print("¡Jugador 2 ha ganado el juego!")
                                 game_over = True
