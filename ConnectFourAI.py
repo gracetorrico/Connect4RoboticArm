@@ -5,8 +5,8 @@ BOARD_SIZE_X = 5
 BOARD_SIZE_Y = 6
 SEARCH_DEPTH = 4
 
-AI_PLAYER = 2
-OTHER_PLAYER = 3
+AI_PLAYER = 1
+OTHER_PLAYER = 2
 
 #
 # Method that runs the minimax algorithm and returns
@@ -263,7 +263,7 @@ def bestMove(gameState, player, opponent):
         gameState[currentMove[0]][currentMove[1]] = 0
 
         if winner == AI_PLAYER:
-            return currentMove[1]
+            return i  # Devolver el índice de columna
 
     for i in range(0, BOARD_SIZE_X):
         # If moves cannot be made on column, skip it
@@ -284,12 +284,16 @@ def bestMove(gameState, player, opponent):
         winner = checkWin(gameState)
         gameState[currentMove[0]][currentMove[1]] = 0
 
-        if winner == OTHER_PLAYER:
-            return currentMove
+        if winner == opponent:
+            return i  # Devolver el índice de columna
 
     move, score = minimax(gameState, SEARCH_DEPTH, player, opponent)
-    return move
-
+    if move is not None:
+        return move[1]  # Devolver el índice de columna
+    else:
+        return None  # No hay movimientos posibles
+    
+    
 #
 # Method that verifies if the current board is in a winning state
 # for any player, returning infinity if that is the case.
