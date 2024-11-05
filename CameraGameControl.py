@@ -187,7 +187,7 @@ def detectar_fichas_webcam(num_filas=6, num_columnas=5, gamma=1.5, intervalo=2, 
                 gameState = last_board_state.copy()
                 ai_recommendation = bestMove(gameState.tolist(), AI_PLAYER, OTHER_PLAYER)
                 if ai_recommendation is not None:
-                    #send_state(ai_recommendation)
+                    #send_state(ai_recommendation+1)
                     print(f"La IA recomienda colocar la ficha en la columna: {ai_recommendation}")
                 else:
                     print("No hay movimientos posibles. El juego ha terminado en empate.")
@@ -201,7 +201,7 @@ def detectar_fichas_webcam(num_filas=6, num_columnas=5, gamma=1.5, intervalo=2, 
 
         # Mostrar la recomendación en la pantalla
         if current_player == AI_PLAYER and ai_recommendation is not None:
-            cv2.putText(imagen_procesada, f"Recomendación IA: Columna {ai_recommendation}", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+            cv2.putText(imagen_procesada, f"Recomendacion IA: Columna {ai_recommendation}", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         # Actualizar cada 'intervalo' segundos
         if time.time() - check_tiempo >= intervalo:
