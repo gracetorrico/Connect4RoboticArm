@@ -12,17 +12,19 @@ cuadrados = []
 cuadrado_seleccionado = None
 offset_x = 0
 offset_y = 0
-#ser = serial.Serial('COM5', 9600, timeout=1)
-
 # Matrices para el estado del tablero
 board_detected = np.zeros((BOARD_SIZE_Y, BOARD_SIZE_X), dtype=int)  # 0s y 1s (detección básica)
 board_game = np.zeros((BOARD_SIZE_Y, BOARD_SIZE_X), dtype=int)  # 2s y 3s (fichas del robot y oponente)
+# Configuración de la conexión serial
+puerto = 'COM6' 
+baud_rate = 9600
+arduino = serial.Serial(puerto, baud_rate)
+time.sleep(2)  # Espera a que se establezca la conexión
 
 def send_state(state):
     if 1 <= state <= 5:
-        # Convert state to byte and send over UART
-        #ser.write(bytes([state]))
-        print(f"Sent state: {state}")
+        arduino.write(f"{state}".encode())  
+        print(f"Número enviado: {state}")
     else:
         print("State out of range (1-5)")
 
@@ -187,7 +189,7 @@ def detectar_fichas_webcam(num_filas=6, num_columnas=5, gamma=1.5, intervalo=2, 
                 gameState = last_board_state.copy()
                 ai_recommendation = bestMove(gameState.tolist(), AI_PLAYER, OTHER_PLAYER)
                 if ai_recommendation is not None:
-                    #send_state(ai_recommendation+1)
+                    send_state(ai_recommendation+1)
                     print(f"La IA recomienda colocar la ficha en la columna: {ai_recommendation}")
                 else:
                     print("No hay movimientos posibles. El juego ha terminado en empate.")
